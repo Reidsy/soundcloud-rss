@@ -58,7 +58,7 @@ func (srss *SoundcloudRSSServer) feed(w http.ResponseWriter, username string, pl
 			pitem.Description = pitem.Title
 		}
 		streamURL := fmt.Sprintf("http://soundcloudrss.reidsy.com/%s/%s/%d.mp3", username, playlist, track.ID)
-		pitem.AddEnclosure(streamURL, podcast.MP3, 8031207)
+		pitem.AddEnclosure(streamURL, podcast.MP3, 0)
 		_, err := pcast.AddItem(pitem)
 		if err != nil {
 			fmt.Printf("addItemErr: (%d) %s", idx, err)
