@@ -69,5 +69,7 @@ func (srss *SoundcloudRSSServer) feed(w http.ResponseWriter, username string, pl
 
 func (srss *SoundcloudRSSServer) stream(w http.ResponseWriter, streamID string) {
 	s := SoundcloudAPI{ClientID: srss.getClientId()}
-	s.streamTrack(streamID, w)
+	url := s.getStreamURL(streamID)
+	w.Header().Set("Location", url)
+	w.WriteHeader(http.StatusMovedPermanently)
 }
