@@ -3,12 +3,20 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"os"
 )
 
 func main() {
-	srss := SoundcloudRSSServer{}
+	soundcloudAPI := SoundcloudSource{
+		ClientID:    os.Getenv("SOUNDCLOUD_CLIENT_ID"),
+		MediaSource: os.Getenv("MEDIA_SOURCE")}
+	encoder := PodcastPlaylistEncoder{}
+	feed := FeedServer{&soundcloudAPI, &encoder}
+	stream := StreamServer{&soundcloudAPI}
+
 	http.HandleFunc("/monitoring/healthcheck", healthcheck)
-	http.Handle("/", &srss)
+	http.Handle("/stream/", &stream)
+	http.Handle("/", &feed)
 	http.ListenAndServe(":8080", nil)
 }
 

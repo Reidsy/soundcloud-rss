@@ -10,7 +10,7 @@ import (
 func TestServerMethodNotAllowed(t *testing.T) {
 	req, _ := http.NewRequest("POST", "/reidsy/likes/rss.xml", strings.NewReader(`{}`))
 	res := httptest.NewRecorder()
-	s := SoundcloudRSSServer{}
+	s := FeedServer{}
 	s.ServeHTTP(res, req)
 
 	if res.Code != 405 {
@@ -21,7 +21,7 @@ func TestServerMethodNotAllowed(t *testing.T) {
 func TestServerMalformedURL(t *testing.T) {
 	req, _ := http.NewRequest("GET", "/invalid/url.html", nil)
 	res := httptest.NewRecorder()
-	s := SoundcloudRSSServer{}
+	s := FeedServer{}
 	s.ServeHTTP(res, req)
 
 	if res.Code != 404 {
@@ -29,24 +29,29 @@ func TestServerMalformedURL(t *testing.T) {
 	}
 }
 
+type StubFeedServerSource struct {
+	playlist Playlist
+}
+
+func (s *StubFeedServerSource) Playlist(username string, playlistName string) Playlist {
+	return s.playlist
+}
+
 func TestServerFeed(t *testing.T) {
 	req, _ := http.NewRequest("GET", "/reidsy/likes/rss.xml", nil)
 	res := httptest.NewRecorder()
-	s := SoundcloudRSSServer{}
+
+	playlist := StubPlaylist{}
+	source := StubFeedServerSource{&playlist}
+	encoder := StubPlaylistEncoder{}
+	s := FeedServer{&source, &encoder}
 	s.ServeHTTP(res, req)
 
 	if res.Code != 200 {
 		t.Fatalf("Expected http status 200, Got %d", res.Code)
 	}
-}
 
-func TestServerStream(t *testing.T) {
-	req, _ := http.NewRequest("GET", "/reidsy/likes/123.mp3", nil)
-	res := httptest.NewRecorder()
-	s := SoundcloudRSSServer{}
-	s.ServeHTTP(res, req)
-
-	if res.Code != 200 {
-		t.Fatalf("Expected http status 200, Got %d", res.Code)
+	if res.Body.String() != playlist.Title() {
+		t.Fatalf("Unexpected data received. Got: %s", res.Body.String())
 	}
 }

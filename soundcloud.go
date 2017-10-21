@@ -9,54 +9,58 @@ import (
 	"time"
 )
 
-type SoundcloudAPI struct {
+type SoundcloudSource struct {
+	MediaSource  string
 	Client       http.Client
 	ClientID     string
 	ClientSecret string
 }
 
-type SoundcloudAPIPlaylist struct {
-	Title       string
-	Link        string
-	Description string
-	Author      string
-	Tracks      []SoundcloudAPITrack
+type SoundcloudPlaylist struct {
+	User         SoundcloudUser
+	PlaylistName string
+	tracks       []Track
 }
 
-func (s *SoundcloudAPI) getFavouritesPlaylist(username string) SoundcloudAPIPlaylist {
-	user := s.getUser(username)
-	title := fmt.Sprintf("%s's Likes", user.Username)
-	likesURL := fmt.Sprintf("https://soundcloud.com/%s/likes", user.Permalink)
-	likes := s.getLikes(user)
-	tracks := []SoundcloudAPITrack{}
-	for _, like := range likes {
-		tracks = append(tracks, like.Track)
-	}
-	playlist := SoundcloudAPIPlaylist{
-		Title:       title,
-		Link:        likesURL,
-		Description: title,
-		Author:      strings.Title(username),
-		Tracks:      tracks,
-	}
-	return playlist
+func (p *SoundcloudPlaylist) Title() string {
+	return strings.Title(p.PlaylistName)
 }
 
-func (s *SoundcloudAPI) getPlaylist(username string, playlist string) {
-
+func (p *SoundcloudPlaylist) Link() string {
+	return fmt.Sprintf("https://soundcloud.com/%s/likes", p.User.Permalink)
 }
 
-func (s *SoundcloudAPI) resolveUrl(asd string) string {
-	u, _ := url.Parse("https://api.soundcloud.com/resolve")
-	q := u.Query()
-	q.Set("client_id", s.ClientID)
-	q.Set("url", asd)
-	u.RawQuery = q.Encode()
-	return u.String()
+func (p *SoundcloudPlaylist) Description() string {
+	return p.Title()
 }
 
-// SoundcloudAPIUser @TODO
-type SoundcloudAPIUser struct {
+func (p *SoundcloudPlaylist) Author() string {
+	return strings.Title(p.User.Username)
+}
+
+func (p *SoundcloudPlaylist) PubDate() *time.Time {
+	t := time.Now()
+	return &t
+}
+
+func (p *SoundcloudPlaylist) LastBuild() *time.Time {
+	t := time.Now()
+	return &t
+}
+
+func (p *SoundcloudPlaylist) Tracks() []Track {
+	return p.tracks
+}
+
+func (s *SoundcloudSource) Playlist(username string, playlistName string) Playlist {
+	user := s.User(username)
+	playlist := SoundcloudPlaylist{User: user, PlaylistName: playlistName}
+	playlist.tracks = s.likes(user)
+
+	return &playlist
+}
+
+type SoundcloudUser struct {
 	ID                   uint   `json:"id"`
 	Permalink            string `json:"permalink"`
 	Username             string `json:"username"`
@@ -64,7 +68,7 @@ type SoundcloudAPIUser struct {
 	PublicFavoritesCount uint   `json:"public_favorites_count"`
 }
 
-func (s *SoundcloudAPI) getUser(username string) SoundcloudAPIUser {
+func (s *SoundcloudSource) User(username string) SoundcloudUser {
 	u, _ := url.Parse("https://api.soundcloud.com/resolve")
 	q := u.Query()
 	q.Set("client_id", s.ClientID)
@@ -72,24 +76,9 @@ func (s *SoundcloudAPI) getUser(username string) SoundcloudAPIUser {
 	u.RawQuery = q.Encode()
 
 	resp, _ := s.Client.Get(u.String())
-
-	user := SoundcloudAPIUser{}
+	user := SoundcloudUser{}
 	json.NewDecoder(resp.Body).Decode(&user)
 	return user
-}
-
-// SoundcloudAPITrack @TODO
-type SoundcloudAPITrack struct {
-	ID          uint64 `json:"id"`
-	Title       string `json:"title"`
-	Description string `json:"description"`
-	Link        string `json:"permalink_url"`
-}
-
-// SoundcloudAPILike @TODO
-type SoundcloudAPILike struct {
-	CreatedAt time.Time          `json:"created_at"`
-	Track     SoundcloudAPITrack `json:"track"`
 }
 
 type SoundcloudAPILikeRequest struct {
@@ -97,7 +86,48 @@ type SoundcloudAPILikeRequest struct {
 	NextHref   string              `json:"next_href"`
 }
 
-func (s *SoundcloudAPI) getLikes(user SoundcloudAPIUser) []SoundcloudAPILike {
+type SoundcloudAPILike struct {
+	CreatedAt time.Time       `json:"created_at"`
+	Track     SoundcloudTrack `json:"track"`
+}
+
+type SoundcloudTrack struct {
+	Fid          uint   `json:"id"`
+	Ftitle       string `json:"title"`
+	Fdescription string `json:"description"`
+	pubdate      time.Time
+	Flink        string `json:"permalink_url"`
+	stream       string
+}
+
+func (t *SoundcloudTrack) ID() uint {
+	return t.Fid
+}
+
+func (t *SoundcloudTrack) Title() string {
+	return t.Ftitle
+}
+
+func (t *SoundcloudTrack) Description() string {
+	if len(t.Fdescription) == 0 {
+		return t.Ftitle
+	}
+	return t.Fdescription
+}
+
+func (t *SoundcloudTrack) PubDate() *time.Time {
+	return &t.pubdate
+}
+
+func (t *SoundcloudTrack) Link() string {
+	return t.Flink
+}
+
+func (t *SoundcloudTrack) Stream() string {
+	return t.stream
+}
+
+func (s *SoundcloudSource) likes(user SoundcloudUser) []Track {
 	u, _ := url.Parse(fmt.Sprintf("https://api-v2.soundcloud.com/users/%d/likes", user.ID))
 
 	q := u.Query()
@@ -110,18 +140,25 @@ func (s *SoundcloudAPI) getLikes(user SoundcloudAPIUser) []SoundcloudAPILike {
 
 	likeRequest := SoundcloudAPILikeRequest{}
 	json.NewDecoder(resp.Body).Decode(&likeRequest)
-	return likeRequest.Collection
+	tracks := []Track{}
+	startDate := time.Now()
+	for idx, like := range likeRequest.Collection {
+		track := like.Track
+		track.stream = fmt.Sprintf("%s/%d.mp3", s.MediaSource, track.Fid)
+		track.pubdate = startDate.AddDate(0, 0, -idx)
+		tracks = append(tracks, &track)
+	}
+	return tracks
 }
 
-// SoundcloudAPIStreams @TODO
-type SoundcloudAPIStreams struct {
+type SoundcloudStreams struct {
 	URL string `json:"http_mp3_128_url"`
 }
 
-func (s *SoundcloudAPI) getStreamURL(streamID string) string {
+func (s *SoundcloudSource) StreamURL(streamID string) string {
 	streamsURL := fmt.Sprintf("https://api.soundcloud.com/tracks/%s/streams?client_id=%s", streamID, s.ClientID)
 	resp, _ := s.Client.Get(streamsURL)
-	streams := SoundcloudAPIStreams{}
+	streams := SoundcloudStreams{}
 	json.NewDecoder(resp.Body).Decode(&streams)
 	return streams.URL
 }
