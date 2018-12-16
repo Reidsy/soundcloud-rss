@@ -81,50 +81,54 @@ func (s *SoundcloudSource) User(username string) SoundcloudUser {
 	return user
 }
 
-type SoundcloudAPILikeRequest struct {
-	Collection []SoundcloudAPILike `json:"collection"`
-	NextHref   string              `json:"next_href"`
-}
-
-type SoundcloudAPILike struct {
-	CreatedAt time.Time       `json:"created_at"`
-	Track     SoundcloudTrack `json:"track"`
+type likesCollection struct {
+	Collection []struct {
+		CreatedAt time.Time `json:"created_at"`
+		Track     struct {
+			Id           uint   `json:"id"`
+			Title        string `json:"title"`
+			Description  string `json:"description"`
+			PermalinkUrl string `json:"permalink_url"`
+		} `json:"track"`
+	} `json:"collection"`
+	NextHref string `json:"next_href"`
 }
 
 type SoundcloudTrack struct {
-	Fid          uint   `json:"id"`
-	Ftitle       string `json:"title"`
-	Fdescription string `json:"description"`
-	pubdate      time.Time
-	Flink        string `json:"permalink_url"`
-	stream       string
+	id          uint
+	title       string
+	description string
+	pubdate     time.Time
+	link        string
+	stream      string
 }
 
-func (t *SoundcloudTrack) ID() uint {
-	return t.Fid
+func (st *SoundcloudTrack) ID() uint {
+	return st.id
 }
 
-func (t *SoundcloudTrack) Title() string {
-	return t.Ftitle
+func (st *SoundcloudTrack) Title() string {
+	return st.title
 }
 
-func (t *SoundcloudTrack) Description() string {
-	if len(t.Fdescription) == 0 {
-		return t.Ftitle
+func (st *SoundcloudTrack) Description() string {
+	if st.description != "" {
+		return st.description
+	} else {
+		return st.title
 	}
-	return t.Fdescription
 }
 
-func (t *SoundcloudTrack) PubDate() *time.Time {
-	return &t.pubdate
+func (st *SoundcloudTrack) PubDate() *time.Time {
+	return &st.pubdate
 }
 
-func (t *SoundcloudTrack) Link() string {
-	return t.Flink
+func (st *SoundcloudTrack) Link() string {
+	return st.link
 }
 
-func (t *SoundcloudTrack) Stream() string {
-	return t.stream
+func (st *SoundcloudTrack) Stream() string {
+	return st.stream
 }
 
 func (s *SoundcloudSource) likes(user SoundcloudUser) []Track {
@@ -138,16 +142,21 @@ func (s *SoundcloudSource) likes(user SoundcloudUser) []Track {
 
 	resp, _ := s.Client.Get(u.String())
 
-	likeRequest := SoundcloudAPILikeRequest{}
-	json.NewDecoder(resp.Body).Decode(&likeRequest)
+	likes := likesCollection{}
 	tracks := []Track{}
-	startDate := time.Now()
-	for idx, like := range likeRequest.Collection {
-		track := like.Track
-		track.stream = fmt.Sprintf("%s/%d.mp3", s.MediaSource, track.Fid)
-		track.pubdate = startDate.AddDate(0, 0, -idx)
+	json.NewDecoder(resp.Body).Decode(&likes)
+	for _, like := range likes.Collection {
+		track := SoundcloudTrack{
+			id:          like.Track.Id,
+			title:       like.Track.Title,
+			description: like.Track.Description,
+			pubdate:     like.CreatedAt,
+			link:        like.Track.PermalinkUrl,
+			stream:      fmt.Sprintf("%s/%d.mp3", s.MediaSource, like.Track.Id),
+		}
 		tracks = append(tracks, &track)
 	}
+
 	return tracks
 }
 

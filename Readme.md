@@ -27,7 +27,7 @@ SOUNDCLOUD_CLIENT_ID=${CLIENT_ID}
 MEDIA_SOURCE=http://localhost:8080/stream
 ```
 
-- `SOUNDCLOUD_DOT_COM_CLIENT_ID` can be obtained by inspecting an api request from the soundcloud web app and looking for the `client_id=` query param.
+- `SOUNDCLOUD_CLIENT_ID` can be obtained by inspecting an api request from the soundcloud web app and looking for the `client_id=` query param.
 - `MEDIA_SOURCE` is where the server will be running, by default this will be localhost on port 8080.
 
 ### Running

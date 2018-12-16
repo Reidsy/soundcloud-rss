@@ -1,7 +1,8 @@
 package main
 
 import (
-	"fmt"
+	"encoding/json"
+	"strings"
 	"testing"
 	"time"
 
@@ -56,14 +57,33 @@ func TestSoundcloudSourcePlaylist(t *testing.T) {
 		URI:                  "https://api.soundcloud.com/users/69198537",
 		PublicFavoritesCount: 102,
 	}
-	likes := SoundcloudAPILikeRequest{
-		NextHref:   "",
-		Collection: []SoundcloudAPILike{}}
-	like := SoundcloudAPILike{time.Now(), SoundcloudTrack{
-		1, "my song", "it's really good", time.Time{}, "http://example.com/my-song", ""}}
-	likeWithoutDescription := SoundcloudAPILike{time.Now(), SoundcloudTrack{
-		1, "my song", "", time.Time{}, "http://example.com/my-song", ""}}
-	likes.Collection = append(likes.Collection, like, likeWithoutDescription)
+
+	likes_json := `{
+		"collection": [
+			{
+				"created_at": "2018-04-30T20:10:11Z",
+				"track": {
+					"id": 1,
+					"title": "my song",
+					"description": "it's really good",
+					"permalink_url": "http://example.com/my-song"
+				}
+			},
+			{
+				"created_at": "2018-04-22T10:20:33Z",
+				"track": {
+					"id": 1,
+					"title": "my song",
+					"description": "",
+					"permalink_url": "http://example.com/my-song"
+				}
+			}
+		],
+		"next_href": ""
+	}`
+	likes := likesCollection{}
+	json.NewDecoder(strings.NewReader(likes_json)).Decode(&likes)
+
 	defer gock.Off()
 
 	// stub user resolution
@@ -116,8 +136,8 @@ func TestSoundcloudSourcePlaylist(t *testing.T) {
 	if track.Description() != "it's really good" {
 		t.Fatalf("Incorrect track description. Got: %s", track.Title())
 	}
-	if track.PubDate().IsZero() {
-		fmt.Print("Expected track PubDate to be set")
+	if track.PubDate().Format(time.RFC3339) != "2018-04-30T20:10:11Z" {
+		t.Fatalf("Incorrect PubDate. Got: %s", track.PubDate())
 	}
 	if track.Link() != "http://example.com/my-song" {
 		t.Fatalf("Incorrect track link. Got: %s", track.Link())
