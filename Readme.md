@@ -40,7 +40,7 @@ $ docker-compose up
 
 ### Requirements
 
-- [go 1.9](https://golang.org/dl)
+- [go 1.11](https://golang.org/dl)
 - [github.com/eduncan911/podcast](https://github.com/eduncan911/podcast)
 - [gopkg.in/h2non/gock.v1](https://github.com/h2non/gock/tree/v1.0.6)
 
