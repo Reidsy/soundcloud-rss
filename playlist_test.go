@@ -69,6 +69,10 @@ func (t *StubTrack) Link() string {
 	return "http://example.com/source-of-this-track.html"
 }
 
+func (t *StubTrack) Image() string {
+	return "http://example.com/image-of-this-track.jpg"
+}
+
 func (t *StubTrack) Stream() string {
 	return "http://example.com/source-of-this-track.mp3"
 }
@@ -106,6 +110,7 @@ const EncodedPodcastPlaylist = `<?xml version="1.0" encoding="UTF-8"?>
       <description>Track Description</description>
       <pubDate>Tue, 24 Oct 2017 07:54:45 +0000</pubDate>
       <enclosure url="http://example.com/source-of-this-track.mp3" length="0" type="audio/mpeg"></enclosure>
+      <itunes:image href="http://example.com/image-of-this-track.jpg"></itunes:image>
     </item>
   </channel>
 </rss>`

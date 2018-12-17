@@ -66,7 +66,8 @@ func TestSoundcloudSourcePlaylist(t *testing.T) {
 					"id": 1,
 					"title": "my song",
 					"description": "it's really good",
-					"permalink_url": "http://example.com/my-song"
+					"permalink_url": "http://example.com/my-song",
+					"artwork_url": "http://example.com/my-song.png"
 				}
 			},
 			{
@@ -75,7 +76,8 @@ func TestSoundcloudSourcePlaylist(t *testing.T) {
 					"id": 1,
 					"title": "my song",
 					"description": "",
-					"permalink_url": "http://example.com/my-song"
+					"permalink_url": "http://example.com/my-song",
+					"artwork_url": "http://example.com/my-song.png"
 				}
 			}
 		],
@@ -141,6 +143,9 @@ func TestSoundcloudSourcePlaylist(t *testing.T) {
 	}
 	if track.Link() != "http://example.com/my-song" {
 		t.Fatalf("Incorrect track link. Got: %s", track.Link())
+	}
+	if track.Image() != "http://example.com/my-song.png" {
+		t.Fatalf("Incorrect track image. Got: %s", track.Image())
 	}
 	if track.Stream() != "http://example.com/streams/1.mp3" {
 		t.Fatalf("Incorrect track stream. Got: %s", track.Stream())
