@@ -89,6 +89,7 @@ type likesCollection struct {
 			Title        string `json:"title"`
 			Description  string `json:"description"`
 			PermalinkUrl string `json:"permalink_url"`
+			ArtworkUrl   string `json:"artwork_url"`
 		} `json:"track"`
 	} `json:"collection"`
 	NextHref string `json:"next_href"`
@@ -100,6 +101,7 @@ type SoundcloudTrack struct {
 	description string
 	pubdate     time.Time
 	link        string
+	image       string
 	stream      string
 }
 
@@ -127,6 +129,10 @@ func (st *SoundcloudTrack) Link() string {
 	return st.link
 }
 
+func (st *SoundcloudTrack) Image() string {
+	return st.image
+}
+
 func (st *SoundcloudTrack) Stream() string {
 	return st.stream
 }
@@ -152,6 +158,7 @@ func (s *SoundcloudSource) likes(user SoundcloudUser) []Track {
 			description: like.Track.Description,
 			pubdate:     like.CreatedAt,
 			link:        like.Track.PermalinkUrl,
+			image:       like.Track.ArtworkUrl,
 			stream:      fmt.Sprintf("%s/%d.mp3", s.MediaSource, like.Track.Id),
 		}
 		tracks = append(tracks, &track)

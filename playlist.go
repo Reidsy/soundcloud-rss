@@ -23,6 +23,7 @@ type Track interface {
 	Description() string
 	PubDate() *time.Time
 	Link() string
+	Image() string
 	Stream() string
 }
 
@@ -44,6 +45,7 @@ func (e *PodcastPlaylistEncoder) Encode(w io.Writer, p Playlist) error {
 			Link:        t.Link(),
 		}
 		item.AddEnclosure(t.Stream(), podcast.MP3, 0)
+		item.AddImage(t.Image())
 		if _, err := cast.AddItem(item); err != nil {
 			// skip item
 			// fmt.Printf("addItemErr: (%d) %s", t.ID(), err)
