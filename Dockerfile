@@ -1,4 +1,4 @@
-FROM golang:1.9 as build
+FROM golang:1.11 as build
 WORKDIR /go/src/github.com/reidsy/soundcloud-rss/
 RUN go get -d github.com/eduncan911/podcast
 RUN go get -d gopkg.in/h2non/gock.v1
