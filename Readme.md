@@ -41,15 +41,6 @@ $ docker-compose up
 ### Requirements
 
 - [go 1.11](https://golang.org/dl)
-- [github.com/eduncan911/podcast](https://github.com/eduncan911/podcast)
-- [gopkg.in/h2non/gock.v1](https://github.com/h2non/gock/tree/v1.0.6)
-
-### Dependency Installation
-
-```
-$ go get -d github.com/eduncan911/podcast
-$ go get -d gopkg.in/h2non/gock.v1
-```
 
 ### Running Tests
 
