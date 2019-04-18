@@ -4,7 +4,7 @@ import (
 	"io"
 	"time"
 
-	"github.com/reidsy/eduncan911.podcast"
+	"github.com/eduncan911/podcast"
 )
 
 type Playlist interface {
