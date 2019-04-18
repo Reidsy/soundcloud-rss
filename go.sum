@@ -1,6 +1,6 @@
+github.com/eduncan911/podcast v0.0.0-20171210162110-10213c61cee5 h1:1eS/9cO7iV3jZt51DyAlHSysOHltL3jpAEltnPPSQ74=
+github.com/eduncan911/podcast v0.0.0-20171210162110-10213c61cee5/go.mod h1:C7Q04QZtv7LW/1X67mc1zwsktpZ68kbxsUS3CYWniJg=
 github.com/pkg/errors v0.8.1 h1:iURUrRGxPUNPdy5/HRSm+Yj6okJ6UtLINN0Q9M4+h3I=
 github.com/pkg/errors v0.8.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
-github.com/reidsy/eduncan911.podcast v1.3.1 h1:mYykA+5WT+QUaDkLBs9nAv/w1f0bLYZauN1raY0tgnM=
-github.com/reidsy/eduncan911.podcast v1.3.1/go.mod h1:OW59gKHqKWy5XtYNVFG/FhNseSJqCGQl5kCfxg9iqWM=
 gopkg.in/h2non/gock.v1 v1.0.12 h1:o3JJqe+h7R9Ay6LtMeFrKz1WnokrJDrNpDQs9KGqVn8=
 gopkg.in/h2non/gock.v1 v1.0.12/go.mod h1:KHI4Z1sxDW6P4N3DfTWSEza07YpkQP7KJBfglRMEjKY=
