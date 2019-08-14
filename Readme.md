@@ -40,7 +40,7 @@ $ docker-compose up
 
 ### Requirements
 
-- [go 1.11](https://golang.org/dl)
+- [go 1.13](https://golang.org/dl)
 
 ### Running Tests
 
