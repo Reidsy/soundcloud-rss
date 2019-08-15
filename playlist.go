@@ -2,6 +2,7 @@ package main
 
 import (
 	"io"
+	"log"
 	"time"
 
 	"github.com/eduncan911/podcast"
@@ -34,7 +35,7 @@ type PlaylistEncoder interface {
 type PodcastPlaylistEncoder struct {
 }
 
-func (e *PodcastPlaylistEncoder) Encode(w io.Writer, p Playlist) error {
+func (e PodcastPlaylistEncoder) Encode(w io.Writer, p Playlist) error {
 	cast := podcast.New(p.Title(), p.Link(), p.Description(), p.PubDate(), p.LastBuild())
 
 	for _, t := range p.Tracks() {
@@ -46,9 +47,8 @@ func (e *PodcastPlaylistEncoder) Encode(w io.Writer, p Playlist) error {
 		}
 		item.AddEnclosure(t.Stream(), podcast.MP3, 0)
 		item.AddImage(t.Image())
-		if _, err := cast.AddItem(item); err != nil {
-			// skip item
-			// fmt.Printf("addItemErr: (%d) %s", t.ID(), err)
+		if idx, err := cast.AddItem(item); err != nil {
+			log.Printf("Skipped adding item at index %d. Playlist: %s Err: %s", idx, p.Link(), err)
 		}
 	}
 
