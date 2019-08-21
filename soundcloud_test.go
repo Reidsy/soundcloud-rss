@@ -61,7 +61,7 @@ func TestSoundcloudSourcePlaylist(t *testing.T) {
 		PublicFavoritesCount: 102,
 	}
 
-	likes_json := `{
+	likesJSON := `{
 		"collection": [
 			{
 				"created_at": "2018-04-30T20:10:11Z",
@@ -87,7 +87,7 @@ func TestSoundcloudSourcePlaylist(t *testing.T) {
 		"next_href": ""
 	}`
 	likes := soundcloudUserLikes{}
-	json.NewDecoder(strings.NewReader(likes_json)).Decode(&likes)
+	json.NewDecoder(strings.NewReader(likesJSON)).Decode(&likes)
 
 	defer gock.Off()
 

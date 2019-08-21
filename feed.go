@@ -9,12 +9,16 @@ import (
 )
 
 var (
+	// ErrMalformedFeedURL is returned when a feed url cannot be used to locate a user and a podcast
 	ErrMalformedFeedURL = errors.New("malformed Feed URL")
 )
 
+// FeedServerSource describes the functions required to fetch a playlist
 type FeedServerSource interface {
 	Playlist(username string, playlistName string) (Playlist, error)
 }
+
+// FeedServer is a http server that encodes a Playlist from a FeedServerSource
 type FeedServer struct {
 	Source  FeedServerSource
 	Encoder PlaylistEncoder
@@ -37,7 +41,7 @@ func (f FeedServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		f.sendStatus(w, http.StatusServiceUnavailable)
 		return
 	}
-	
+
 	f.Encoder.Encode(w, playlist)
 }
 
