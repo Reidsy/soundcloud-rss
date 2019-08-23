@@ -42,6 +42,15 @@ $ docker-compose up
 
 - [go 1.13](https://golang.org/dl)
 
+### Development
+
+Run the following commands before opening a pull request.
+
+```
+$ go fmt
+$ go vet
+```
+
 ### Running Tests
 
 ```
