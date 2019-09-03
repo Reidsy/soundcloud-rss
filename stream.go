@@ -19,7 +19,7 @@ type StreamServer struct {
 	Source StreamServerSource
 }
 
-func (s *StreamServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (s StreamServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		s.sendStatus(w, http.StatusMethodNotAllowed)
 		return
@@ -34,12 +34,12 @@ func (s *StreamServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	s.redirectToStream(w, streamID)
 }
 
-func (s *StreamServer) sendStatus(w http.ResponseWriter, status int) {
+func (s StreamServer) sendStatus(w http.ResponseWriter, status int) {
 	w.WriteHeader(status)
 	fmt.Fprintf(w, "%s\n", http.StatusText(status))
 }
 
-func (s *StreamServer) parseURL(u *url.URL) (string, error) {
+func (s StreamServer) parseURL(u *url.URL) (string, error) {
 	matcher := regexp.MustCompile(`\/(\d+)\.mp3$`)
 	match := matcher.FindStringSubmatch(u.Path)
 	if len(match) != 2 {
@@ -48,7 +48,7 @@ func (s *StreamServer) parseURL(u *url.URL) (string, error) {
 	return match[1], nil
 }
 
-func (s *StreamServer) redirectToStream(w http.ResponseWriter, streamID string) {
+func (s StreamServer) redirectToStream(w http.ResponseWriter, streamID string) {
 	url := s.Source.StreamURL(streamID)
 	w.Header().Set("Location", url)
 	w.WriteHeader(http.StatusMovedPermanently)

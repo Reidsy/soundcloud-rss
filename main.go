@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 )
@@ -14,10 +15,13 @@ func main() {
 	feed := FeedServer{&soundcloudAPI, &encoder}
 	stream := StreamServer{&soundcloudAPI}
 
-	http.HandleFunc("/monitoring/healthcheck", healthcheck)
-	http.Handle("/stream/", &stream)
-	http.Handle("/", &feed)
-	http.ListenAndServe(":8080", nil)
+	router := http.NewServeMux()
+	router.HandleFunc("/monitoring/healthcheck", healthcheck)
+	router.Handle("/stream/", &stream)
+	router.Handle("/", &feed)
+	
+	serveErr := http.ListenAndServe(":8080", router)
+	log.Fatal(serveErr)
 }
 
 func healthcheck(w http.ResponseWriter, r *http.Request) {

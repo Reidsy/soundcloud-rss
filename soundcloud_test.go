@@ -16,7 +16,7 @@ func TestSoundcloudSourceUser(t *testing.T) {
 		Get("/resolve").
 		MatchParam("url", "^https://soundcloud.com/reidsy$").
 		Reply(200).
-		JSON(SoundcloudUser{
+		JSON(soundcloudUser{
 			ID:                   69198537,
 			Permalink:            "reidsy",
 			Username:             "Reidsy",
@@ -26,8 +26,11 @@ func TestSoundcloudSourceUser(t *testing.T) {
 
 	source := SoundcloudSource{
 		ClientID: "not_my_client_id"}
-	user := source.User("reidsy")
+	user, userErr := source.fetchUser("reidsy")
 
+	if userErr != nil {
+		t.Fatalf("userErr is not nil. Got %s", userErr)
+	}
 	if user.ID != 69198537 {
 		t.Fatalf("User ID is incorrect. Got: %d", user.ID)
 	}
@@ -50,7 +53,7 @@ func TestSoundcloudSourceUser(t *testing.T) {
 }
 
 func TestSoundcloudSourcePlaylist(t *testing.T) {
-	user := SoundcloudUser{
+	user := soundcloudUser{
 		ID:                   69198537,
 		Permalink:            "reidsy",
 		Username:             "Reidsy",
@@ -83,7 +86,7 @@ func TestSoundcloudSourcePlaylist(t *testing.T) {
 		],
 		"next_href": ""
 	}`
-	likes := likesCollection{}
+	likes := soundcloudUserLikes{}
 	json.NewDecoder(strings.NewReader(likes_json)).Decode(&likes)
 
 	defer gock.Off()
@@ -105,7 +108,10 @@ func TestSoundcloudSourcePlaylist(t *testing.T) {
 		MediaSource: "http://example.com/streams",
 		ClientID:    "my_client_id"}
 
-	playlist := source.Playlist("reidsy", "likes")
+	playlist, playlistErr := source.Playlist("reidsy", "likes")
+	if playlistErr != nil {
+		t.Fatalf("playlistErr is not nil. Got %s", playlistErr)
+	}
 	if playlist.Title() != "Likes" {
 		t.Fatalf("Incorrect playlist title. Got: %s", playlist.Title())
 	}

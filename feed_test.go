@@ -33,8 +33,8 @@ type StubFeedServerSource struct {
 	playlist Playlist
 }
 
-func (s *StubFeedServerSource) Playlist(username string, playlistName string) Playlist {
-	return s.playlist
+func (s *StubFeedServerSource) Playlist(username string, playlistName string) (Playlist, error) {
+	return s.playlist, nil
 }
 
 func TestServerFeed(t *testing.T) {

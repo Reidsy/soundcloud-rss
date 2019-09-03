@@ -11,33 +11,33 @@ import (
 type StubPlaylist struct {
 }
 
-func (p *StubPlaylist) Title() string {
+func (p StubPlaylist) Title() string {
 	return "My Example Playlist"
 }
 
-func (p *StubPlaylist) Description() string {
+func (p StubPlaylist) Description() string {
 	return "A description of My Example Playlist"
 }
 
-func (p *StubPlaylist) Link() string {
+func (p StubPlaylist) Link() string {
 	return "http://example.com/source-of-this-playlist"
 }
 
-func (p *StubPlaylist) Author() string {
+func (p StubPlaylist) Author() string {
 	return "A cool guy"
 }
 
-func (p *StubPlaylist) PubDate() *time.Time {
+func (p StubPlaylist) PubDate() *time.Time {
 	publish, _ := time.Parse(time.RFC3339, "2017-10-24T15:04:05Z")
 	return &publish
 }
 
-func (p *StubPlaylist) LastBuild() *time.Time {
+func (p StubPlaylist) LastBuild() *time.Time {
 	build, _ := time.Parse(time.RFC3339, "2017-10-24T17:00:25Z")
 	return &build
 }
 
-func (p *StubPlaylist) Tracks() []Track {
+func (p StubPlaylist) Tracks() []Track {
 	goodTrack := StubTrack{}
 	invalidTrack := StubInvalidTrack{}
 	tracks := []Track{}
@@ -48,32 +48,32 @@ func (p *StubPlaylist) Tracks() []Track {
 type StubTrack struct {
 }
 
-func (t *StubTrack) ID() uint {
+func (t StubTrack) ID() uint {
 	return 12
 }
 
-func (t *StubTrack) Title() string {
+func (t StubTrack) Title() string {
 	return "Track Title"
 }
 
-func (t *StubTrack) Description() string {
+func (t StubTrack) Description() string {
 	return "Track Description"
 }
 
-func (t *StubTrack) PubDate() *time.Time {
+func (t StubTrack) PubDate() *time.Time {
 	publish, _ := time.Parse(time.RFC3339, "2017-10-24T07:54:45Z")
 	return &publish
 }
 
-func (t *StubTrack) Link() string {
+func (t StubTrack) Link() string {
 	return "http://example.com/source-of-this-track.html"
 }
 
-func (t *StubTrack) Image() string {
+func (t StubTrack) Image() string {
 	return "http://example.com/image-of-this-track.jpg"
 }
 
-func (t *StubTrack) Stream() string {
+func (t StubTrack) Stream() string {
 	return "http://example.com/source-of-this-track.mp3"
 }
 
@@ -81,14 +81,14 @@ type StubInvalidTrack struct {
 	StubTrack
 }
 
-func (t *StubInvalidTrack) Description() string {
+func (t StubInvalidTrack) Description() string {
 	return ""
 }
 
 type StubPlaylistEncoder struct {
 }
 
-func (e *StubPlaylistEncoder) Encode(w io.Writer, p Playlist) error {
+func (e StubPlaylistEncoder) Encode(w io.Writer, p Playlist) error {
 	w.Write([]byte(p.Title()))
 	return nil
 }
