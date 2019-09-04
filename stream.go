@@ -9,12 +9,16 @@ import (
 )
 
 var (
+	// ErrMalformedStreamURL is returned when a streamID cannot be pulled from the URL
 	ErrMalformedStreamURL = errors.New("malformed Stream URL")
 )
 
+// StreamServerSource describes the functions required for a client to fetch the podcast track
 type StreamServerSource interface {
 	StreamURL(streamID string) string
 }
+
+// StreamServer is a http server that redirects clients to the url of a stream
 type StreamServer struct {
 	Source StreamServerSource
 }

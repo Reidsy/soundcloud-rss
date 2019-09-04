@@ -9,5 +9,5 @@ COPY --from=build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certifica
 COPY --from=build /go/src/github.com/reidsy/soundcloud-rss/passwd /etc/passwd
 COPY --from=build /go/src/github.com/reidsy/soundcloud-rss/soundcloud-rss /go/bin/soundcloud-rss
 USER go
-CMD ["/go/bin/soundcloud-rss"]
+ENTRYPOINT ["/go/bin/soundcloud-rss"]
 EXPOSE 8080

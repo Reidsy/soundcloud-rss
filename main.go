@@ -19,7 +19,7 @@ func main() {
 	router.HandleFunc("/monitoring/healthcheck", healthcheck)
 	router.Handle("/stream/", &stream)
 	router.Handle("/", &feed)
-	
+
 	serveErr := http.ListenAndServe(":8080", router)
 	log.Fatal(serveErr)
 }
