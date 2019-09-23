@@ -1,3 +1,4 @@
 soundcloud-rss
 config.env
 .vscode/
+*.env

@@ -1,0 +1,22 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: clone
+        uses: actions/checkout@master
+
+      - name: build
+        run: |
+          IMAGE_NAME=`echo "${GITHUB_REPOSITORY}" | tr '[:upper:]' '[:lower:]'`
+          IMAGE_TAG=`echo "${GITHUB_REF}" | cut -d'/' -f3`
+          echo "${{ secrets.DockerhubPassword }}" | docker login -u "${{ secrets.DockerhubUsername }}" --password-stdin
+          docker build -t $IMAGE_NAME:$IMAGE_TAG --build-arg GIT_COMMIT=${GITHUB_SHA} .
+          docker push $IMAGE_NAME:$IMAGE_TAG
