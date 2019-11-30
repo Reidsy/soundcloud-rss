@@ -15,8 +15,10 @@ jobs:
 
       - name: build
         run: |
+          PACKAGE_REPO='docker.pkg.github.com'
+          REPO_OWNER=`echo ${GITHUB_REPOSITORY} | cut -d'/' -f1 | tr '[:upper:]' '[:lower:]'`
           IMAGE_NAME=`echo "${GITHUB_REPOSITORY}" | tr '[:upper:]' '[:lower:]'`
           IMAGE_TAG=`echo "${GITHUB_REF}" | cut -d'/' -f3`
-          echo "${{ secrets.DockerhubPassword }}" | docker login -u "${{ secrets.DockerhubUsername }}" --password-stdin
-          docker build -t $IMAGE_NAME:$IMAGE_TAG --build-arg GIT_COMMIT=${GITHUB_SHA} .
-          docker push $IMAGE_NAME:$IMAGE_TAG
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login $PACKAGE_REPO -u $REPO_OWNER --password-stdin
+          docker build -t $PACKAGE_REPO/$IMAGE_NAME/$IMAGE_TAG --build-arg GIT_COMMIT=${GITHUB_SHA} .
+          docker push $PACKAGE_REPO/$IMAGE_NAME/$IMAGE_TAG
