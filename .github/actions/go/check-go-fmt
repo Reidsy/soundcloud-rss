@@ -1,0 +1,6 @@
+#!/bin/sh
+
+# Runs go fmt and checks to see whether any files have changed.
+# Will exit with a code of 1 if files are formatted or 0 if nothing changed.
+
+test -z "`go fmt`"
