@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"log"
 	"net/http"
 	"net/url"
 	"regexp"
@@ -38,6 +39,7 @@ func (f FeedServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	playlist, playlistErr := f.Source.Playlist(username, playlistName)
 	if playlistErr != nil {
+		log.Printf("Playlist Error: %s", playlistErr)
 		f.sendStatus(w, http.StatusServiceUnavailable)
 		return
 	}
