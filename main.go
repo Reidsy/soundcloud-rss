@@ -5,9 +5,14 @@ import (
 	"log"
 	"net/http"
 	"os"
+
+	"cloud.google.com/go/profiler"
 )
 
 func main() {
+	// start profiler
+	profile()
+
 	router, err := router()
 	if err != nil {
 		log.Fatal(err)
@@ -37,4 +42,16 @@ func healthcheckEndpoint(w http.ResponseWriter, r *http.Request) {
 	status := http.StatusOK
 	w.WriteHeader(status)
 	fmt.Fprintf(w, "%s\n", http.StatusText(status))
+}
+
+func profile() {
+	err := profiler.Start(profiler.Config{
+		Service:        "com-reidsy-soundcloudrss",
+		ProjectID:      "com-reidsy-soundcloudrss",
+		DebugLogging:   false,
+		MutexProfiling: true,
+	})
+	if err != nil {
+		log.Printf("Failed to start Stackdriver Profiler: %v", err)
+	}
 }
