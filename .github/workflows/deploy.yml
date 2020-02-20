@@ -1,5 +1,18 @@
 name: Deploy
 
+##### REQUIRED SECRETS #####
+#
+# Google Cloud Secrets:
+#       GCloudAuth   B64 encoded google-application-credentials.json file
+#    GCloudProject   Name of project that the credentials file has access to
+#       GCloudZone   Zone of instance that will be deployed to
+#   GCloudInstance   Name of instance that will be deployed to
+#
+# Souncloud-rss Environment Variables:
+#   AppSoundcloudClientId   Envar for SOUNDCLOUD_CLIENT_ID
+#          AppMediaSource   Envar for MEDIA_SOURCE
+#
+
 on:
   push:
     branches:
@@ -13,12 +26,44 @@ jobs:
       - name: clone
         uses: actions/checkout@master
 
-      - name: build
+      - name: docker login
         run: |
           PACKAGE_REPO='docker.pkg.github.com'
           REPO_OWNER=`echo ${GITHUB_REPOSITORY} | cut -d'/' -f1 | tr '[:upper:]' '[:lower:]'`
           IMAGE_NAME=`echo "${GITHUB_REPOSITORY}" | tr '[:upper:]' '[:lower:]'`
           IMAGE_TAG=`echo "${GITHUB_REF}" | cut -d'/' -f3`
+          echo "::set-env name=IMAGE_ID::$PACKAGE_REPO/$IMAGE_NAME/$IMAGE_TAG"
           echo "${{ secrets.GITHUB_TOKEN }}" | docker login $PACKAGE_REPO -u $REPO_OWNER --password-stdin
-          docker build -t $PACKAGE_REPO/$IMAGE_NAME/$IMAGE_TAG --build-arg GIT_COMMIT=${GITHUB_SHA} .
-          docker push $PACKAGE_REPO/$IMAGE_NAME/$IMAGE_TAG
+
+      - name: gcloud login
+        uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
+        with:
+          version: '278.0.0'
+          service_account_key: ${{ secrets.GCloudAuth }}
+
+      - name: gcloud connect
+        run: |
+          mkdir -p ~/.ssh
+          echo -e "Host *\n    StrictHostKeyChecking no" > ~/.ssh/config
+          gcloud config set project ${{ secrets.GCloudProject }}
+          gcloud -q compute config-ssh
+          DOCKER_HOST=ssh://$USER@${{ secrets.GCloudInstance }}.${{ secrets.GCloudZone }}.${{ secrets.GCloudProject }}:22
+          echo "::set-env name=DOCKER_HOST::$DOCKER_HOST"
+
+      - name: build
+        run: |
+          docker build -t $IMAGE_ID --build-arg GIT_COMMIT=${GITHUB_SHA} .
+
+      - name: publish
+        run: |
+          docker push $IMAGE_ID
+
+      - name: deploy
+        run: |
+          docker stop soundcloud-rss || true
+          docker rm soundcloud-rss || true
+          docker pull $IMAGE_ID
+          docker run -d -p 80:8080 --name soundcloud-rss \
+            -e SOUNDCLOUD_CLIENT_ID=${{ secrets.AppSoundcloudClientId }} \
+            -e MEDIA_SOURCE=${{ secrets.AppMediaSource }} \
+            $IMAGE_ID
